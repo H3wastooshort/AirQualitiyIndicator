@@ -20,7 +20,7 @@
 #define GREEN 12
 #define BUZZ 13
 
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7); //RS,E,D4,D5,D6,D7
+LiquidCrystal lcd(2, 3, 4, 5, 6, 7); //RS,E,D4,D5,D6,D7
 ClosedCube_HDC1080 hdc1080;
 Adafruit_CCS811 ccs;
 
