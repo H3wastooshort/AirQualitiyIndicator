@@ -173,11 +173,44 @@ void setDisplay() {
   lcd.print("TVOC: ");
   lcd.print(tvocppm);
   lcd.print("ppm");
+
+  lcd.setCursor(10, 0);
+  lcd.print("T: ");
+  lcd.print(temp);
+  lcd.print("°C");
+
+  lcd.setCursor(10, 1);
+  lcd.print("H: ");
+  lcd.print(hum);
+  lcd.print("%");
+}
+
+void printSens() {
+  if (error) {
+    Serial.println("Sensor Error");
+    return;
+  }
+  Serial.print("CO2: ");
+  Serial.print(co2ppm);
+  Serial.println("ppm");
+
+  Serial.print("TVOC: ");
+  Serial.print(tvocppm);
+  Serial.println("ppm");
+
+  Serial.print("T: ");
+  Serial.print(temp);
+  Serial.println("°C");
+
+  Serial.print("H: ");
+  Serial.print(hum);
+  Serial.println("%");
 }
 
 void loop() {
   readSens();
   setLights();
   setDisplay();
+  printSens();
   delay(500);
 }
