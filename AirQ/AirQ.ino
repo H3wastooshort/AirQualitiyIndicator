@@ -20,7 +20,7 @@
 #define GREEN 12
 #define BUZZ 13
 
-LiquidCrystal lcd(2, 3, 4, 5, 6, 7); //RS,E,D4,D5,D6,D7
+LiquidCrystal lcd(2, 3, 5, 6, 7, 8); //RS,E,D4,D5,D6,D7
 ClosedCube_HDC1080 hdc1080;
 Adafruit_CCS811 ccs;
 
@@ -60,6 +60,19 @@ void setup() {
   pinMode(GREEN, OUTPUT);
   pinMode(BUZZ, OUTPUT);
 
+  digitalWrite(RED, HIGH);
+  delay(100);
+  digitalWrite(RED, LOW);
+  digitalWrite(YELLOW, HIGH);
+  delay(100);
+  digitalWrite(YELLOW, LOW);
+  digitalWrite(GREEN, HIGH);
+  delay(100);
+  digitalWrite(GREEN, LOW);
+  digitalWrite(BUZZ, HIGH);
+  delay(100);
+  digitalWrite(BUZZ, LOW);
+
   lcd.begin(16, 2);
   lcd.createChar(0, warnHalf1);
   lcd.createChar(1, warnHalf2);
@@ -70,6 +83,7 @@ void setup() {
   if (!ccs.begin()) {
     Serial.println(F("ERROR"));
     lcd.print(F("ERROR"));
+    error = true;
   }
   else {
     while (!ccs.available());
@@ -83,10 +97,29 @@ void setup() {
   if (!hdc1080.readTemperature() and !hdc1080.readHumidity()) {
     Serial.println(F("ERROR"));
     lcd.print(F("ERROR"));
+    error = true;
   }
   else {
     Serial.println(F("OK"));
     lcd.print(F("OK"));
+  }
+  
+  if (error) {
+    tone(BUZZ, 1500, 500);
+    tone(BUZZ, 1000, 500);
+    tone(BUZZ, 500, 500);
+    noTone();
+  }
+  
+  while (error) {
+    digitalWrite(RED, LOW);
+    digitalWrite(YELLOW, LOW);
+    digitalWrite(GREEN, LOW);
+    delay(500);
+    digitalWrite(RED, HIGH);
+    digitalWrite(YELLOW, HIGH);
+    digitalWrite(GREEN, LOW);
+    delay(500);
   }
 
   delay(500);
@@ -167,22 +200,22 @@ void setDisplay() {
   lcd.setCursor(0, 0);
   lcd.print("CO2: ");
   lcd.print(co2ppm);
-  lcd.print("ppm");
+  //lcd.print("ppm");
 
   lcd.setCursor(0, 1);
   lcd.print("TVOC: ");
   lcd.print(tvocppm);
-  lcd.print("ppm");
+  //lcd.print("ppm");
 
   lcd.setCursor(10, 0);
   lcd.print("T: ");
-  lcd.print(temp);
-  lcd.print("°C");
+  lcd.print((int)temp);
+  //lcd.print("°C");
 
   lcd.setCursor(10, 1);
   lcd.print("H: ");
-  lcd.print(hum);
-  lcd.print("%");
+  lcd.print((int)hum);
+  //lcd.print("%");
 }
 
 void printSens() {
