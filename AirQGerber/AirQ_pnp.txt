@@ -1,0 +1,40 @@
+*Pick And Place List
+*Company=
+*Author=
+*eMail=
+*
+*Project=AirQ
+*Date=13:36:35
+*CreatedBy=Fritzing 0.9.4.2019-12-01.CD-498-0-a1ffcea
+*
+*
+*Coordinates in mm, always center of component
+*Origin 0/0=Lower left corner of PCB
+*Rotation in degree (0-360, math. pos.)
+*
+*No;Value;Package;X;Y;Rotation;Side;Name
+1;100;2010 [SMD];25.1226;-21.6331;0;Top;R1
+2;100;2010 [SMD];17.5026;-19.0931;0;Top;R2
+3;;THT;32.3961;-21.6396;90;Bottom;R4
+4;;;40.0444;-21.6255;0;Bottom;Via7
+5;;THT;45.1025;-21.6332;0;Bottom;J2
+6;;;6.99958;-21.6455;0;Bottom;Via6
+7;;;27.3225;-20.3632;90;Bottom;Arduino ProMini
+8;;TO92 [THT];14.432;-3.76433;0;Bottom;Q3
+9;;;4.54468;-26.642;0;Bottom;RED
+10;;THT;20.9725;-3.85323;90;Bottom;J3
+11;;;19.7024;-21.6333;0;Bottom;Via3
+12;;usb-minib;42.3526;-5.8132;180;Top;U1
+13;;;37.4893;-24.1537;0;Bottom;Via8
+14;;;4.54468;-16.4821;0;Bottom;YELLOW
+15;;;8.28962;-12.4826;0;Bottom;Via1
+16;;;12.0745;-24.189;0;Bottom;Via5
+17;;;34.9425;-5.12323;0;Bottom;J1
+18;;;13.2553;-16.5882;0;Bottom;LCD1
+19;;;12.0745;-19.1077;0;Bottom;Via4
+20;1µF;100 mil [THT, electrolytic];28.5925;-3.85323;180;Bottom;C1
+21;;TO92 [THT];14.432;-8.84433;0;Bottom;Q1
+22;;;4.47115;-11.4663;0;Bottom;Via2
+23;;TO92 [THT];22.052;-8.84433;0;Bottom;Q2
+24;100;2010 [SMD];17.5026;-24.1732;0;Top;R3
+25;;;4.54468;-6.32205;0;Bottom;GREEN

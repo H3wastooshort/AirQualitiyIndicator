@@ -94,7 +94,7 @@ void setup() {
   lcd.setCursor(0, 1);
   Serial.print(F("HDC1080: "));
   hdc1080.begin(0x40);
-  if (!hdc1080.readTemperature() and !hdc1080.readHumidity()) {
+  if (isnan(hdc1080.readTemperature()) or isnan(hdc1080.readHumidity())) {
     Serial.println(F("ERROR"));
     lcd.print(F("ERROR"));
     error = true;
@@ -103,14 +103,14 @@ void setup() {
     Serial.println(F("OK"));
     lcd.print(F("OK"));
   }
-  
+
   if (error) {
     tone(BUZZ, 1500, 500);
     tone(BUZZ, 1000, 500);
     tone(BUZZ, 500, 500);
-    noTone();
+    noTone(BUZZ);
   }
-  
+
   while (error) {
     digitalWrite(RED, LOW);
     digitalWrite(YELLOW, LOW);
@@ -128,20 +128,24 @@ void setup() {
 
 void readSens() {
   if (!hdc1080.readTemperature()) {
-    temp = hdc1080.readTemperature();
     Serial.println(F("HDC1080 TEMP ERROR"));
     error = true;
   }
+  else {
+    temp = hdc1080.readTemperature();
+  }
 
   if (!hdc1080.readHumidity()) {
-    hum = hdc1080.readHumidity();
     Serial.println(F("HDC1080 HUM ERROR"));
     error = true;
   }
+  else {
+    hum = hdc1080.readHumidity();
+  }
 
-
-  error = false;
-  if (ccs.available() and !ccs.checkError()) {
+  if (!ccs.checkError()) {
+    while(!ccs.available());
+    while(ccs.readData());
     ccs.setEnvironmentalData(hum, temp);
     co2ppm = ccs.geteCO2();
     tvocppm = ccs.getTVOC();
