@@ -11,6 +11,7 @@
 #include <Adafruit_CCS811.h>
 #include <ClosedCube_HDC1080.h>
 #include <LiquidCrystal.h>
+#include <avr/wdt.h>
 
 #define CO2_PPM_BUZZ 3000
 #define CO2_PPM_RED 2000
@@ -29,6 +30,7 @@ int tvocppm;
 float temp;
 float hum;
 bool error;
+bool ledState;
 
 byte warnHalf1[8] = {
   0b00001,
@@ -94,7 +96,8 @@ void setup() {
   lcd.setCursor(0, 1);
   Serial.print(F("HDC1080: "));
   hdc1080.begin(0x40);
-  if (isnan(hdc1080.readTemperature()) or isnan(hdc1080.readHumidity())) {
+  Wire.beginTransmission(0x40);
+  if (Wire.endTransmission(0x40) != 0) {
     Serial.println(F("ERROR"));
     lcd.print(F("ERROR"));
     error = true;
@@ -124,19 +127,22 @@ void setup() {
 
   delay(500);
   lcd.clear();
+  wdt_enable(WDTO_8S);
 }
 
 void readSens() {
-  if (!hdc1080.readTemperature()) {
-    Serial.println(F("HDC1080 TEMP ERROR"));
+  Wire.beginTransmission(0x40);
+  if (Wire.endTransmission(0x40)) {
+    Serial.println(F("HDC1080 ERROR"));
     error = true;
   }
   else {
     temp = hdc1080.readTemperature();
   }
 
-  if (!hdc1080.readHumidity()) {
-    Serial.println(F("HDC1080 HUM ERROR"));
+  Wire.beginTransmission(0x40);
+  if (Wire.endTransmission(0x40)) {
+    Serial.println(F("HDC1080 ERROR"));
     error = true;
   }
   else {
@@ -144,8 +150,8 @@ void readSens() {
   }
 
   if (!ccs.checkError()) {
-    while(!ccs.available());
-    while(ccs.readData());
+    while (!ccs.available());
+    while (ccs.readData());
     ccs.setEnvironmentalData(hum, temp);
     co2ppm = ccs.geteCO2();
     tvocppm = ccs.getTVOC();
@@ -157,11 +163,21 @@ void readSens() {
 }
 
 void setLights() {
-  digitalWrite(GREEN, HIGH);
-  digitalWrite(YELLOW, LOW);
-  digitalWrite(RED, LOW);
-  digitalWrite(BUZZ, LOW);
-  noTone(BUZZ);
+  if (error) {
+    digitalWrite(RED, ledState);
+    digitalWrite(YELLOW, ledState);
+    digitalWrite(GREEN, LOW);
+    error = false;
+    return;
+  }
+
+  if (co2ppm < CO2_PPM_YELLOW) {
+    digitalWrite(GREEN, HIGH);
+    digitalWrite(YELLOW, LOW);
+    digitalWrite(RED, LOW);
+    digitalWrite(BUZZ, LOW);
+    noTone(BUZZ);
+  }
 
   if (co2ppm > CO2_PPM_YELLOW) {
     digitalWrite(GREEN, LOW);
@@ -174,19 +190,23 @@ void setLights() {
   if (co2ppm > CO2_PPM_RED) {
     digitalWrite(GREEN, LOW);
     digitalWrite(YELLOW, LOW);
-    digitalWrite(RED, digitalRead(RED));
+    digitalWrite(RED, HIGH);
+    digitalWrite(BUZZ, LOW);
+    noTone(BUZZ);
   }
 
   if (co2ppm > CO2_PPM_BUZZ) {
     digitalWrite(GREEN, LOW);
     digitalWrite(YELLOW, LOW);
-    if (digitalRead(RED)) {
+    if (ledState) {
       digitalWrite(RED, LOW);
       tone(BUZZ, 1480);
+      ledState = !ledState;
     }
     else {
       digitalWrite(RED, HIGH);
       tone(BUZZ, 1568);
+      ledState = !ledState;
     }
   }
 
@@ -246,8 +266,13 @@ void printSens() {
 
 void loop() {
   readSens();
+  wdt_reset();
   setLights();
+  wdt_reset();
   setDisplay();
+  wdt_reset();
   printSens();
+  wdt_reset();
   delay(500);
+  wdt_reset();
 }
