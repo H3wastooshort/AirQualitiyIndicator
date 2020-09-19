@@ -54,6 +54,73 @@ byte warnHalf2[8] = {
   0b11111
 };
 
+byte tv[] = {
+  B00111,
+  B00010,
+  B00010,
+  B00000,
+  B00101,
+  B00101,
+  B00010,
+  B00000
+};
+
+byte oc[] = {
+  B11100,
+  B10100,
+  B11100,
+  B00000,
+  B11100,
+  B10000,
+  B11100,
+  B00000
+};
+
+
+byte c[] = {
+  B00110,
+  B01000,
+  B01000,
+  B01000,
+  B01000,
+  B01000,
+  B01000,
+  B00110
+};
+
+byte o[] = {
+  B11100,
+  B10100,
+  B11100,
+  B00000,
+  B11000,
+  B01000,
+  B10000,
+  B11000
+};
+
+byte ppm[] = {
+  B11011,
+  B11011,
+  B10010,
+  B00000,
+  B01010,
+  B10101,
+  B10001,
+  B00000
+};
+
+byte degC[] = {
+  B10000,
+  B00110,
+  B01000,
+  B01000,
+  B01000,
+  B01000,
+  B00110,
+  B00000
+};
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -79,6 +146,15 @@ void setup() {
   lcd.createChar(0, warnHalf1);
   lcd.createChar(1, warnHalf2);
 
+  lcd.createChar(2, tv);
+  lcd.createChar(3, oc);
+
+  lcd.createChar(4, c);
+  lcd.createChar(5, o);
+
+  lcd.createChar(6, ppm);
+  lcd.createChar(7, degC);
+
   lcd.setCursor(0, 0);
   Serial.print(F("CCS811: "));
   lcd.print(F("CCS811: "));
@@ -94,6 +170,7 @@ void setup() {
   }
 
   lcd.setCursor(0, 1);
+  lcd.print(F("HDC1080: "));
   Serial.print(F("HDC1080: "));
   hdc1080.begin(0x40);
   Wire.beginTransmission(0x40);
@@ -150,8 +227,22 @@ void readSens() {
   }
 
   if (!ccs.checkError()) {
-    while (!ccs.available());
-    while (ccs.readData());
+    int wait;
+    while (!ccs.available()) {
+      wait++;
+      delay(1);
+      if (wait >= 1000) {
+        break;
+      }
+    };
+    wait = 0;
+    while (ccs.readData()) {
+      wait++;
+      delay(1);
+      if (wait >= 1000) {
+        break;
+      }
+    };
     ccs.setEnvironmentalData(hum, temp);
     co2ppm = ccs.geteCO2();
     tvocppm = ccs.getTVOC();
@@ -168,6 +259,7 @@ void setLights() {
     digitalWrite(YELLOW, ledState);
     digitalWrite(GREEN, LOW);
     error = false;
+    ledState = !ledState;
     return;
   }
 
@@ -213,6 +305,19 @@ void setLights() {
 }
 
 void setDisplay() {
+  lcd.createChar(0, warnHalf1);
+  lcd.createChar(1, warnHalf2);
+
+  lcd.createChar(2, tv);
+  lcd.createChar(3, oc);
+
+  lcd.createChar(4, c);
+  lcd.createChar(5, o);
+  
+  lcd.createChar(6, ppm);
+  lcd.createChar(7, degC);
+
+
   if (error) {
     lcd.clear();
     lcd.home();
@@ -221,25 +326,36 @@ void setDisplay() {
     lcd.print(" Sensor Error");
     return;
   }
+  lcd.clear();
+
   lcd.setCursor(0, 0);
-  lcd.print("CO2: ");
+  //lcd.print("CO2: ");
+  lcd.write(byte(4));
+  lcd.write(byte(5));
+  lcd.print(":");
   lcd.print(co2ppm);
   //lcd.print("ppm");
+  lcd.write(byte(6));
 
   lcd.setCursor(0, 1);
-  lcd.print("TVOC: ");
+  //lcd.print("TVOC: ");
+  lcd.write(byte(2));
+  lcd.write(byte(3));
+  lcd.print(":");
   lcd.print(tvocppm);
   //lcd.print("ppm");
+  lcd.write(byte(6));
 
   lcd.setCursor(10, 0);
   lcd.print("T: ");
   lcd.print((int)temp);
   //lcd.print("°C");
+  lcd.write(byte(7));
 
   lcd.setCursor(10, 1);
   lcd.print("H: ");
   lcd.print((int)hum);
-  //lcd.print("%");
+  lcd.print("%");
 }
 
 void printSens() {
